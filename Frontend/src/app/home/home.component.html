@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Oject ID</title>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" integrity="sha256-h20CPZ0QyXlBuAw7A+KluUYx/3pK+c7lYEpqLTlxjYQ=" crossorigin="anonymous" />
+
+
+</head>
+
+<body>
+    
+    <div class="logo-div">
+        <img class="logo" src="../../assets/logo.png"/>
+
+    </div>
+    <div class="search-div">
+        <div class="search-container">
+            <form class="form-group" (submit)="search()"[formGroup]="form"> 
+                <input type="text" id="search-field" class="form-control" formControlName="numPlate" placeholder="Enter a keyword" required>
+                <button type="submit" class="search-button" id="search-btn"><i class="fa fa-search"></i></button>
+
+            </form>
+        </div>
+        <br>
+ 
+    </div>
+    <div class="detail-search">
+        <h3 style="text-align: center;">Detailed search: </h3>
+        <div>
+            <form class="form-group"  (submit)="Dsearch()"[formGroup]="Dform"> 
+                <span id="numPlate"> 
+                    <input type="text" id="search-field" class="form-control" formControlName="numplate" placeholder="License">
+                </span>
+                <span id="color"> 
+                    <input type="text" id="search-field" class="form-control" formControlName="color" placeholder="Color" >
+                </span>
+                <span id="make"> 
+                    <input type="text" id="search-field" class="form-control" formControlName="make" placeholder="Make">
+                </span>
+                <span id="model"> 
+                    <input type="text" id="search-field" class="form-control" formControlName="model" placeholder="Model">
+                </span>
+                <span id="flag"> 
+                    <input type="text" id="search-field" class="form-control" formControlName="flag" placeholder="SAPS flag">
+                </span>
+                <span>
+                    <button type="submit" class="Dsearch-button" id="search-btn"><i class="fa fa-search"></i></button>
+                </span>
+               
+            </form>
+        </div>
+       
+    </div>
+
+    <br>
+    <div class="container" id="main-content">
+
+        <hr class="mt-2 mb-5">
+        
+
+        <div class="box_container">
+            <table  align="center" style="width:60% " *ngIf='answer!=null'>
+                <tr>
+                    <th>License Plate</th>
+                    <th>Color</th>
+                    <th>Make</th>
+                    <th>Model</th>
+                    <th>SAPS Flagged</th>
+                    <th>Duplicate</th>
+                </tr>
+                <tr id="box0" class="box" *ngFor='let i of answer'> 
+                    <td class="numPlate" >{{i.license_plate}}</td>
+                    <td class="color">{{i.color}}</td>
+                    <td class="make">{{i.make}}</td>
+                    <td class="model">{{i.model}}</td>
+                    <td class="flag">{{i.saps_flagged}}</td>
+                    <td class="duplicate">{{i.license_plate_duplicate}}</td>
+                </tr>
+                </table> 
+
+        </div>
+        <div class="box_container">
+            <table  style="width:60% " *ngIf='answer2!=null'>
+                <tr>
+                    <th>License Plate</th>
+                    <th>Color</th>
+                    <th>Make</th>
+                    <th>Model</th>
+                    <th>SAPS Flagged</th>
+                    <th>Duplicate</th>
+                </tr>
+                <tr id="box0" class="box" *ngFor='let i of answer2'> 
+                    <td class="numPlate" >{{i.license_plate}}</td>
+                    <td class="color">{{i.color}}</td>
+                    <td class="make">{{i.make}}</td>
+                    <td class="model">{{i.model}}</td>
+                    <td class="flag">{{i.saps_flagged}}</td>
+                    <td class="duplicate">{{i.license_plate_duplicate}}</td>
+                </tr>
+                </table> 
+
+        </div>
+    </div>
+    
+
+
+</body>
+</html>
