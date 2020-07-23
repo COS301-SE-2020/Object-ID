@@ -164,3 +164,49 @@ input #numplate{
     margin-left:auto; 
     margin-right:auto;
 }
+
+.logout{
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    background-color: #2d476e;
+    border-radius: 25px;
+    border: 0;
+    color: #FFF;
+    max-height: 46px;
+    max-width:100px;
+    min-width:100px;
+    outline: 0;
+
+}
+
+/* .register{
+    position: absolute;
+    right: 110px;
+    top: 4px;
+    background-color: #2d476e;
+    border-radius: 25px;
+    border: 0;
+    color: #FFF;
+    max-height: 46px;
+    max-width:100px;
+    min-width:100px;
+    outline: 0;
+
+} */
+  
+
+  .dropdown {
+    position: absolute;
+    right: 330px;
+    top: 223px;
+    border-radius: 25px;
+    border: 0;
+    max-height: 50px;
+    max-width:100px;
+    min-width:100px;
+    outline: 0;
+  }
+
+
+  

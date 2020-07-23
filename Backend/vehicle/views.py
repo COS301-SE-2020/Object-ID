@@ -1,16 +1,20 @@
+from datetime import datetime
+
 from django.shortcuts import render
 
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import permissions
+from django.db.models import Q
+from rest_framework import permissions, filters
 
 from .models import Vehicle, ImageSpace
 from .serializers import VehicleSerializer
+from tracking.serializers import TrackingSerializer
 from tools.viewsets import ActionAPI, validate_params
 
 
 class VehicleBase(ActionAPI):
     # TODO: Place this back in when login is added
-    # permission_classes = [permissions.IsAuthenticated, ] 
+    permission_classes = [permissions.IsAuthenticated, ] 
     @csrf_exempt
     @validate_params(['license_plate'])
     def get_vehicle(self, request, params=None, *args, **kwargs):
@@ -37,8 +41,6 @@ class VehicleBase(ActionAPI):
 
         # TODO: Implement SAPS flag checking
 
-        # TODO: Implement sending warnings on duplicates
-
         vehicle = Vehicle.objects.filter(license_plate=params['license_plate'])
 
         if vehicle.count() > 0:
@@ -60,14 +62,40 @@ class VehicleBase(ActionAPI):
                 serializer = VehicleSerializer(data=data)
                 if serializer.is_valid():
                     serializer.save()
-                    return serializer.data
+                    tracking_data = {
+                        "vehicle": serializer.data.get("id"),
+                        "date": datetime.now(),
+                        "location": params.get("location", "No location")
+                    }
+                    tracking_serializer = TrackingSerializer(data=tracking_data)
+                    if tracking_serializer.is_valid():
+                        tracking_serializer.save()
+                    return {
+                        "success": True,
+                        "duplicate": True,
+                        "payload": {
+                            "vehicles": serializer.data
+                        }
+                    }
                 return serializer.errors
 
             # This vehicle is not a duplicate but already exists within the system
-            # TODO: Add tracking stuff
+            tracking_data = {
+                "vehicle": vehicle,
+                "date": datetime.now(),
+                "location": params.get("location", "No Location")
+            }
+
+            tracking_serializer = TrackingSerializer(data=tracking_data)
+            if (tracking_serializer.is_valid()):
+                tracking_serializer.save()
+
+            return {
+                "success": True,
+                "message": "Vehicle tracked"
+            }
         
         # This vehicle is not within our system yet, add it
-
         data = {
             "license_plate": params["license_plate"],
             "make": params["make"],
@@ -80,6 +108,16 @@ class VehicleBase(ActionAPI):
         serializer = VehicleSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+
+            tracking_data = {
+                "vehicle": serializer.data.get("id"),
+                "date": datetime.now(),
+                "location": params.get("location", "No location")
+            }
+            tracking_serializer = TrackingSerializer(data=tracking_data)
+            if tracking_serializer.is_valid():
+                tracking_serializer.save()
+
             return serializer.data
         data = {
             "success": False,
@@ -88,43 +126,129 @@ class VehicleBase(ActionAPI):
         return data
 
     @csrf_exempt
-    def search_or(self, request, params=None, *args, **kwargs):
+    @validate_params(["filters", "type"])
+    def search_advanced(self, request, params=None, *args, **kwargs):
         """ 
         Used to search for vehicles by various paramaters
         """
 
-        queryset = Vehicle.objects.none()
+        search_type = params.get("type", None)
+        filters_param = params.get('filters', None)
 
-        filters = params.get('filters', {})
+        if search_type == "and":
+            """AND TYPE SEARCH"""
+            queryset = Vehicle.objects.all()
 
-        license_plate = filters.get('license_plate', None)
-        make = filters.get('make', None)
-        model = filters.get('model', None)
-        color = filters.get('color', None)
-        saps_flagged = filters.get('saps_flagged', None)
-        license_plate_duplicate = filters.get('license_plate_duplicate', None)
+            if filter is None:
+                return {
+                    "success": False,
+                    "message": "Filters argument not provided"
+                }
 
-        if license_plate:
-            queryset |= Vehicle.objects.filter(license_plate=license_plate)
-        if make:
-            queryset |= Vehicle.objects.filter(make=make)
-        if model:
-            queryset |= Vehicle.objects.filter(model=model)
-        if color:
-            queryset |= Vehicle.objects.filter(color=color)
-        if saps_flagged:
-            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
-        if license_plate_duplicate:
-            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+            license_plate = filters_param.get('license_plate', None)
+            make = filters_param.get('make', None)
+            model = filters_param.get('model', None)
+            color = filters_param.get('color', None)
+            saps_flagged = filters_param.get('saps_flagged', None)
+            license_plate_duplicate = filters_param.get('license_plate_duplicate', None)
+
+            if license_plate:
+                queryset = queryset.filter(license_plate=license_plate)
+
+            if make:
+                queryset = queryset.filter(make=make)
+
+            if model:
+                queryset = queryset.filter(model=model)
+            
+            if color:
+                queryset = queryset.filter(color=color)
+
+            if saps_flagged:
+                queryset = queryset.filter(saps_flagged=saps_flagged)
+
+            if license_plate_duplicate:
+                queryset = queryset.filter(license_plate_duplicate=license_plate_duplicate)
+
+            if queryset.count() == 0:
+                return {
+                    "success": False,
+                    "message": "No items match this query"
+                }
+
+            serializer = VehicleSerializer(queryset, many=True)
+
+            return serializer.data
+
+        elif search_type == "or":
+            """OR TYPE SEARCH"""
+            queryset = Vehicle.objects.none()
+
+            license_plate = filters_param.get('license_plate', None)
+            make = filters_param.get('make', None)
+            model = filters_param.get('model', None)
+            color = filters_param.get('color', None)
+            saps_flagged = filters_param.get('saps_flagged', None)
+            license_plate_duplicate = filters_param.get('license_plate_duplicate', None)
+
+            if license_plate:
+                queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            if make:
+                queryset |= Vehicle.objects.filter(make=make)
+            if model:
+                queryset |= Vehicle.objects.filter(model=model)
+            if color:
+                queryset |= Vehicle.objects.filter(color=color)
+            if saps_flagged:
+                queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+            if license_plate_duplicate:
+                queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+
+            if queryset.count() == 0:
+                return {
+                    "success": False,
+                    "message": "No data matching query"
+                }
+
+            serializer = VehicleSerializer(queryset, many=True)
+
+            return serializer.data
+
+        return {
+            "success": False,
+            "message": "Search type is not supported"
+        }
+    
+    @validate_params(['search'])
+    def search(self, request, params=None, *args, **kwargs):
+        """
+        Used to search the database of Vehicles by keywords
+        """
+
+        # TODO: Consider implementing multiple words?
+
+        word_match = params.get("search", None)
+
+        if word_match is None:
+            return {
+                "success": False,
+                "message": "No search words were passed through"
+            }
+
+        queryset = Vehicle.objects.filter(
+            Q(license_plate__icontains=word_match) |
+            Q(make__icontains=word_match) |
+            Q(model__icontains=word_match) |
+            Q(color__icontains=word_match)
+        )
 
         if queryset.count() == 0:
             return {
                 "success": False,
-                "message": "No data matching query"
+                "message": "No items matching given keywords"
             }
 
         serializer = VehicleSerializer(queryset, many=True)
-
         return serializer.data
 
     @csrf_exempt
@@ -171,3 +295,135 @@ class VehicleBase(ActionAPI):
             "success": False,
             "reason": "Something went wrong with OpenALPR"
         }
+    
+    @validate_params(["license_plate", "make", "model", "color", "file"])
+    def camera_add_full(self, request, params=None, *args, **kwargs):
+        """
+        Used to add an image and full vehicle data from a camera into the system
+        """
+
+        vehicle = Vehicle.objects.filter(license_plate=params['license_plate'])
+        image = ImageSpace(image=params['file'])
+        image.save()
+
+        if vehicle.count() > 0:
+            vehicle = vehicle[0]
+
+            if params['make'] != vehicle.make or vehicle.model != params['model'] or vehicle.color != params['color']:
+                # This license plate is a duplicate in this case
+                vehicle.license_plate_duplicate = True
+                vehicle.save()
+                data = {
+                    "license_plate": params["license_plate"],
+                    "make": params["make"],
+                    "model": params["model"],
+                    "color": params["color"],
+                    "saps_flagged": False,
+                    "license_plate_duplicate": True
+                }
+
+                serializer = VehicleSerializer(data=data)
+                if serializer.is_valid():
+                    serializer.save()
+                    tracking_data = {
+                        "vehicle": serializer.instance(),
+                        "date": datetime.now(),
+                        "location": params.get("location", "No location")
+                    }
+                    tracking_serializer = TrackingSerializer(data=tracking_data)
+                    tracking_serializer.save()
+
+                    image.vehicle = serializer.validated_data
+                    image.save()
+
+                    # TODO: Implement image ID and damage saving
+
+                    return {
+                        "success": True,
+                        "duplicate": True,
+                        "payload": {
+                            "vehicles": serializer.data
+                        }
+                    }
+                return serializer.errors
+
+            # This vehicle is not a duplicate but already exists within the system
+            tracking_data = {
+                "vehicle": vehicle,
+                "date": datetime.now(),
+                "location": params.get("location", "No Location")
+            }
+
+            tracking_serializer = TrackingSerializer(data=tracking_data)
+            if tracking_serializer.is_valid():
+                tracking_serializer.save()
+            image.vehicle = vehicle
+            image.save()
+
+            # TODO: Implement image ID and damage saving
+
+            return {
+                "success": True,
+                "message": "Vehicle tracked"
+            }
+        
+        # This vehicle is not within our system yet, add it
+        data = {
+            "license_plate": params["license_plate"],
+            "make": params["make"],
+            "model": params["model"],
+            "color": params["color"],
+            "saps_flagged": False, #TODO: Add this checking stuff
+            "license_plate_duplicate": False
+        }
+
+        serializer = VehicleSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+
+            tracking_data = {
+                "vehicle": serializer.data.get("id"),
+                "date": datetime.now(),
+                "location": params.get("location", "No location")
+            }
+            tracking_serializer = TrackingSerializer(data=tracking_data)
+            if tracking_serializer.is_valid():
+                tracking_serializer.save()
+
+            image.vehicle = serializer.validated_data
+            image.save()
+
+            # TODO: Implement image ID and damage saving
+
+            return serializer.data
+        data = {
+            "success": False,
+            "payload": serializer.errors
+        }
+        return data
+        
+
+    def get_saps_flagged(self, request, params=None, *args, **kwargs):
+        """
+        Used to retrieve the set of vehicles that have been flagged by SAPS and saved in our system
+        """
+
+        queryset = Vehicle.objects.filter(saps_flagged=True)
+
+        serializer = VehicleSerializer(queryset, many=True)
+
+        return serializer.data
+
+
+    def get_duplicates(self, request, params=None, *args, **kwags):
+        """
+        Used to retrieve the set of vehicles that are duplicates
+        """
+
+        queryset = Vehicle.objects.filter(license_plate_duplicate=True)
+
+        serializer = VehicleSerializer(queryset, many=True)
+
+        return serializer.data
+
+        

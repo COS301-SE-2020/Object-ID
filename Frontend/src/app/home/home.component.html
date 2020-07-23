@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Oject ID</title>
+    <title>Object ID Home</title>
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
@@ -19,6 +19,7 @@
 
     </div>
     <div class="search-div">
+        <span>
         <div class="search-container">
             <form class="form-group" (submit)="search()"[formGroup]="form"> 
                 <input type="text" id="search-field" class="form-control" formControlName="numPlate" placeholder="Enter a keyword" required>
@@ -26,13 +27,26 @@
 
             </form>
         </div>
+        </span>
+        <span>
+            <div class="dropdown">
+                    <select [(ngModel)]="selectedOption">
+                        <option *ngFor="let order of selectedFilter;" [value]="order.name">
+                            {{order.name}}
+                          </option>
+                    </select>
+                   <button type="submit" (click)="filter()">Submit</button>
+
+                   </div>
+
+        </span>
         <br>
  
     </div>
     <div class="detail-search">
         <h3 style="text-align: center;">Detailed search: </h3>
         <div>
-            <form class="form-group"  (submit)="Dsearch()"[formGroup]="Dform"> 
+            <form class="form-group"  (submit)="Dsearch()" [formGroup]="Dform"> 
                 <span id="numPlate"> 
                     <input type="text" id="search-field" class="form-control" formControlName="numplate" placeholder="License">
                 </span>
@@ -64,7 +78,7 @@
         
 
         <div class="box_container">
-            <table  align="center" style="width:60% " *ngIf='answer!=null'>
+            <table  align="center" style="width:60% " *ngIf='answer != null'>
                 <tr>
                     <th>License Plate</th>
                     <th>Color</th>
@@ -73,7 +87,7 @@
                     <th>SAPS Flagged</th>
                     <th>Duplicate</th>
                 </tr>
-                <tr id="box0" class="box" *ngFor='let i of answer'> 
+                <tr id="box0" class="box" *ngFor='let i of answer.payload'> 
                     <td class="numPlate" >{{i.license_plate}}</td>
                     <td class="color">{{i.color}}</td>
                     <td class="make">{{i.make}}</td>
@@ -85,7 +99,7 @@
 
         </div>
         <div class="box_container">
-            <table  style="width:60% " *ngIf='answer2!=null'>
+            <table  style="width:60% " *ngIf='answer2 != null'>
                 <tr>
                     <th>License Plate</th>
                     <th>Color</th>
@@ -94,7 +108,28 @@
                     <th>SAPS Flagged</th>
                     <th>Duplicate</th>
                 </tr>
-                <tr id="box0" class="box" *ngFor='let i of answer2'> 
+                <tr id="box0" class="box" *ngFor='let i of answer2.payload'> 
+                    <td class="numPlate" >{{i.license_plate}}</td>
+                    <td class="color">{{i.color}}</td>
+                    <td class="make">{{i.make}}</td>
+                    <td class="model">{{i.model}}</td>
+                    <td class="flag">{{i.saps_flagged}}</td>
+                    <td class="duplicate">{{i.license_plate_duplicate}}</td>
+                </tr>
+                </table> 
+
+        </div>
+        <div class="box_container">
+            <table  align="center" style="width:60% " *ngIf='answer3 != null'>
+                <tr>
+                    <th>License Plate</th>
+                    <th>Color</th>
+                    <th>Make</th>
+                    <th>Model</th>
+                    <th>SAPS Flagged</th>
+                    <th>Duplicate</th>
+                </tr>
+                <tr id="box0" class="box" *ngFor='let i of answer3.payload'> 
                     <td class="numPlate" >{{i.license_plate}}</td>
                     <td class="color">{{i.color}}</td>
                     <td class="make">{{i.make}}</td>
@@ -106,8 +141,12 @@
 
         </div>
     </div>
-    
+    <form class="form-group" (submit)="logout()"> 
+        <button type="submit" class="logout" >Logout</button>
+    </form>
+    <!--<form class="form-group" (submit)="register()"> 
+        <button type="submit" class="register" >Register</button>
 
-
+    </form> -->
 </body>
 </html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Object ID Login</title>
+    <!-- font awesome link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" integrity="sha256-h20CPZ0QyXlBuAw7A+KluUYx/3pK+c7lYEpqLTlxjYQ=" crossorigin="anonymous" />
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" integrity="sha256-h20CPZ0QyXlBuAw7A+KluUYx/3pK+c7lYEpqLTlxjYQ=" crossorigin="anonymous" />
+</head>
+
+<body>
+
+    <div class="cent">
+        <img class="logo" src="../../assets/logo.png"/>
+    </div>
+    <div>
+    <div class="loginContainer">
+        <div class="logReg">
+        </div>
+        <div>
+            <form class="form-group" (submit)="submitLogin()" [formGroup]="form"> 
+            <br><input placeholder="Username" id="uname" type="text" class="form-control" formControlName="username" name="username">
+            <br>
+            <br><input placeholder="Password" class="form-control" formControlName="password" id="password" type="password" name="password"><br>
+            <div id="input">
+                <button id="submit"> <i class="fa fa-sign-in"></i>  Login</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+
+</html>
