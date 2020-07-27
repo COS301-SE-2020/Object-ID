@@ -23,3 +23,6 @@ Thembinkosi Mtsweni
 
 ## Git Strategy
 We are following the git-flow branching strategy
+
+## User Manual
+The user manual for the objectID system can be found at: https://www.overleaf.com/project/5f197cd823d5de00013d950e
