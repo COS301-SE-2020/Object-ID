@@ -19,7 +19,7 @@ Luke Greenberg - https://openbracketret.github.io
 Johannes Wolmarans - https://www.linkedin.com/in/johannes-wolmarans-1714211a8/
 Zoe Schnetler - https://www.linkedin.com/in/zoe-schnetler-6490681b0/
 Stephen Du Plessis - https://stevedups.github.io/online-cv/
-Thembinkosi Mtsweni 
+Thembinkosi Mtsweni - https://isaacmcgrind.github.io/online-cv/
 
 ## Git Strategy
 We are following the git-flow branching strategy
