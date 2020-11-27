@@ -1,7 +1,7 @@
 # Object-ID
 
 ### Description
-Object-ID is a system that will be used to cross check vehicles against SAPS databases as well as attempt to identify damage that is present on the vehicle.
+Object-ID is a system that will be used to cross check vehicles against SAPS databases as well as attempt to identify damage that is present on the vehicle, in order to make a unique profile of the vechile.
 
 
 ## Official repositories
